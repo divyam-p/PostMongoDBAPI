@@ -18,14 +18,21 @@ public class DaggerModule {
 
 	private static HttpServer server;
 	private static MongoClient db;
+	private static int port = 8080; 
 	
     @Provides public MongoClient provideMongoClient() {
         /* TODO: Fill in this function */
-    	return null;
+      return MongoClients.create("mongodb://localhost:27017");
     }
 
     @Provides public HttpServer provideHttpServer() {
         /* TODO: Fill in this function */
-        return null;
+      try {
+        return HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      return null;
     }
 }
