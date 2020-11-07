@@ -22,17 +22,19 @@ public class DaggerModule {
 	
     @Provides public MongoClient provideMongoClient() {
         /* TODO: Fill in this function */
-      return MongoClients.create("mongodb://localhost:27017");
+      db = MongoClients.create("mongodb://localhost:27017");
+      return db;
     }
 
     @Provides public HttpServer provideHttpServer() {
         /* TODO: Fill in this function */
       try {
-        return HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
+        this.server= HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
+        return server;
       } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
-      return null;
+      return server;
     }
 }
