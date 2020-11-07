@@ -29,7 +29,7 @@ public class DaggerModule {
     @Provides public HttpServer provideHttpServer() {
         /* TODO: Fill in this function */
       try {
-        this.server= HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
+        server= HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
         return server;
       } catch (IOException e) {
         // TODO Auto-generated catch block
