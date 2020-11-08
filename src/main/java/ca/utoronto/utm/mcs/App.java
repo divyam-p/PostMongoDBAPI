@@ -15,7 +15,6 @@ public class App
     	//Create your server context here
         
     	service.getServer().createContext("/api/v1/post", new CreatePost(service.getDb()));
-    	service.getServer().createContext("/api/v1/get", new CreatePost(service.getDb()));
     	
     	service.getServer().start();
     	
