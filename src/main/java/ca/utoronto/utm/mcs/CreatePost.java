@@ -42,6 +42,9 @@ public class CreatePost implements HttpHandler {
       else if(r.getRequestMethod().equals("GET")) {
         handleGet(r);
       }
+      else if(r.getRequestMethod().equals("DELETE")) {
+        handleDelete(r);
+      }
       else {
         r.sendResponseHeaders(405, -1);
       }
@@ -160,12 +163,12 @@ public class CreatePost implements HttpHandler {
       
       for(Document doc : documents) {
         if(doc.get("title").toString().contains(title) && doc.get("_id") != (temp)){
-          arr.add(doc.toJson());
+          tracker.add(doc.toJson());
         }
       }
       
 
-      if(arr.isEmpty()) {
+      if(tracker.isEmpty()) {
         r.sendResponseHeaders(404, -1);
       }
       
@@ -183,6 +186,30 @@ public class CreatePost implements HttpHandler {
     
   }
   
+  
+  
+  public void handleDelete(HttpExchange r) throws IOException, JSONException{
+    String body = Utils.convert(r.getRequestBody());
+    JSONObject deserialized = new JSONObject(body);
+    
+    String id = "";
+    
+    if(deserialized.has("_id")) {
+      id = deserialized.getString("_id");
+    }
+    
+    if(!deserialized.has("_id")) {
+      r.sendResponseHeaders(400, -1);
+    }
+    else {
+      ObjectId temp = new ObjectId(id);
+      collection.findOneAndDelete(new Document().append("_id", temp));
+      r.sendResponseHeaders(200, -1);
+      
+    }
+    
+    
+  }
   
   
   
