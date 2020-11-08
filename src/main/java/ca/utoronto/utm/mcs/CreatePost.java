@@ -117,26 +117,25 @@ public class CreatePost implements HttpHandler {
     ArrayList<String> tracker = new ArrayList<>();
     String id = "";
     String title = "";
+    ObjectId temp = null; 
     
     if(deserialized.has("title")) {
       title = deserialized.getString(("title"));
     }
     if(deserialized.has("_id")) {
       id = deserialized.getString("_id");
+      temp = new ObjectId(id);
     }
     
     if(!deserialized.has("_id") && !deserialized.has("title")) {
       r.sendResponseHeaders(400, -1);
     }
-    ObjectId temp = new ObjectId(id);
     if(deserialized.has("_id")) {
-    
       FindIterable<Document> documents = collection.find(new Document().append("_id", temp));
       
       if(documents == null) {
         r.sendResponseHeaders(404, -1);
       }
-      // For the other one yuo need a for loop here
 
       Document newDoc = documents.first();
       tracker.add(newDoc.toJson());
@@ -146,16 +145,10 @@ public class CreatePost implements HttpHandler {
       os.write((tracker.toString()).getBytes());
       os.close();
       
-//      for(Document doc : documents) {
-//        
-//      }
-//      
     }
     if(deserialized.has("title")) {
-      // Only for title
       ArrayList<String> arr = new ArrayList<String>();
-      FindIterable<Document> documents = collection.find();
-      
+      FindIterable<Document> documents = collection.find().sort(new Document().append("title", 1));
       
       if(documents == null) {
         r.sendResponseHeaders(404, -1);
@@ -163,26 +156,21 @@ public class CreatePost implements HttpHandler {
       
       for(Document doc : documents) {
         if(doc.get("title").toString().contains(title) && doc.get("_id") != (temp)){
-          tracker.add(doc.toJson());
+
+          tracker.add(doc.toJson()); 
         }
       }
-      
-
+     
       if(tracker.isEmpty()) {
         r.sendResponseHeaders(404, -1);
       }
-      
-      
-      
- 
+
       r.sendResponseHeaders(200, tracker.toString().length());
       OutputStream os = r.getResponseBody();
       os.write((tracker.toString()).getBytes());
-      os.close();
+      os.close();    
       
-      
-    }
-    
+    }  
     
   }
   
