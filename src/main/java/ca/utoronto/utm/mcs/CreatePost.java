@@ -55,6 +55,16 @@ public class CreatePost implements HttpHandler {
   }
   
   
+  public boolean checkDup(String title, String author, String content, ArrayList<String> tags){
+    
+    FindIterable<Document> documents = collection.find(new Document().append("title", title).append("author", author).append("content", content).append("tags", tags));
+    if(documents.first() == null) {
+      return false;
+    }
+    return true;
+  
+  }
+  
   
   public void handlePut(HttpExchange r) throws IOException, JSONException{
     
@@ -85,8 +95,13 @@ public class CreatePost implements HttpHandler {
       }
     }
     
-    if(!deserialized.has("tags") || !deserialized.has("title") || !deserialized.has("author") || !deserialized.has("content") || !deserialized.has("content")) {
+    if(!deserialized.has("tags") || !deserialized.has("title") || !deserialized.has("author") || !deserialized.has("content")) {
       r.sendResponseHeaders(400, -1);
+    }
+    
+    else if(checkDup(title, author, content, tags)) {
+      r.sendResponseHeaders(400, -1);
+      
     }
     else {
       
