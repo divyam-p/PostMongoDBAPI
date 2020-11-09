@@ -221,6 +221,7 @@ public class CreatePost implements HttpHandler {
       collection.findOneAndDelete(new Document().append("_id", temp));
       r.sendResponseHeaders(200, -1);
       
+      
     }
     
     
