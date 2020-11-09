@@ -139,7 +139,14 @@ public class CreatePost implements HttpHandler {
     }
     if(deserialized.has("_id")) {
       id = deserialized.getString("_id");
-      temp = new ObjectId(id);
+      try { 
+        //What if an Id is given that cannot be found in the database, but the title exists then what do we do? 
+        //Right now it would give a 404 not found error
+        temp = new ObjectId(id);
+      } 
+      catch(Exception e) { 
+        r.sendResponseHeaders(404, -1);
+      }
     }
     
     if(!deserialized.has("_id") && !deserialized.has("title")) {
@@ -148,7 +155,7 @@ public class CreatePost implements HttpHandler {
     if(deserialized.has("_id")) {
       FindIterable<Document> documents = collection.find(new Document().append("_id", temp));
       
-      if(documents == null) {
+      if(documents.first() == null) {
         r.sendResponseHeaders(404, -1);
       }
 
@@ -162,10 +169,9 @@ public class CreatePost implements HttpHandler {
       
     }
     if(deserialized.has("title")) {
-      ArrayList<String> arr = new ArrayList<String>();
       FindIterable<Document> documents = collection.find().sort(new Document().append("title", 1));
       
-      if(documents == null) {
+      if(documents.first() == null) {
         r.sendResponseHeaders(404, -1);
       }
       
@@ -196,6 +202,7 @@ public class CreatePost implements HttpHandler {
     JSONObject deserialized = new JSONObject(body);
     
     String id = "";
+    ObjectId temp = null; 
     
     if(deserialized.has("_id")) {
       id = deserialized.getString("_id");
@@ -205,7 +212,12 @@ public class CreatePost implements HttpHandler {
       r.sendResponseHeaders(400, -1);
     }
     else {
-      ObjectId temp = new ObjectId(id);
+      try { 
+        temp = new ObjectId(id);
+      }
+      catch(Exception e) { 
+        r.sendResponseHeaders(404, -1);
+      }
       collection.findOneAndDelete(new Document().append("_id", temp));
       r.sendResponseHeaders(200, -1);
       
