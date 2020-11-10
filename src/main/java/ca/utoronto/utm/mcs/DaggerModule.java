@@ -16,25 +16,29 @@ import com.mongodb.client.MongoClients;
 @Module
 public class DaggerModule {
 
-	private static HttpServer server;
-	private static MongoClient db;
-	private static int port = 8080; 
-	
+    private static HttpServer server;
+    private static MongoClient db;
+    private static Post post;
+    private static int port = 8080; 
+
     @Provides public MongoClient provideMongoClient() {
-        /* TODO: Fill in this function */
       db = MongoClients.create("mongodb://localhost:27017");
       return db;
     }
 
     @Provides public HttpServer provideHttpServer() {
-        /* TODO: Fill in this function */
       try {
         server= HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
         return server;
       } catch (IOException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
       return server;
+    }
+
+    @Provides public Post providePost(MongoClient db) {
+      post = new Post(db);
+      return post;
+
     }
 }

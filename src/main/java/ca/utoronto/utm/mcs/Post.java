@@ -17,22 +17,18 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-public class CreatePost implements HttpHandler {
+public class Post implements HttpHandler {
 
   private MongoClient mongoClient;
   private MongoDatabase database;
   private MongoCollection<Document> collection;
   
-  public CreatePost(MongoClient mongoC) {
+  public Post(MongoClient mongoC) {
     mongoClient = mongoC;
     database = mongoClient.getDatabase("csc301a2");
     collection = database.getCollection("posts");
   }
 
-
-  // Not sure if this is right [Does not match TA's]
-  
- 
   public void handle(HttpExchange r) throws IOException {
     try {
       
