@@ -17,22 +17,18 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-public class CreatePost implements HttpHandler {
+public class Post implements HttpHandler {
 
   private MongoClient mongoClient;
   private MongoDatabase database;
   private MongoCollection<Document> collection;
   
-  public CreatePost(MongoClient mongoC) {
+  public Post(MongoClient mongoC) {
     mongoClient = mongoC;
     database = mongoClient.getDatabase("csc301a2");
     collection = database.getCollection("posts");
   }
 
-
-  // Not sure if this is right [Does not match TA's]
-  
- 
   public void handle(HttpExchange r) throws IOException {
     try {
       
@@ -55,19 +51,24 @@ public class CreatePost implements HttpHandler {
   }
   
   
+  public boolean checkDup(String title, String author, String content, ArrayList<String> tags){
+    
+    FindIterable<Document> documents = collection.find(new Document().append("title", title).append("author", author).append("content", content).append("tags", tags));
+    if(documents.first() == null) {
+      return false;
+    }
+    return true;
   
+  }
   public void handlePut(HttpExchange r) throws IOException, JSONException{
     
     String body = Utils.convert(r.getRequestBody());
     JSONObject deserialized = new JSONObject(body);
-    
     String title ="";
     String author ="";
     String content ="";
     JSONArray temp;
     ArrayList<String> tags = new ArrayList<String>();
-    
-    
     if(deserialized.has("title")) {
       title = deserialized.getString(("title"));
     }
@@ -83,15 +84,14 @@ public class CreatePost implements HttpHandler {
       for(int i = 0; i < temp.length(); i++) {
         tags.add( temp.get(i).toString() );
       }
+    } 
+    if(!deserialized.has("tags") || !deserialized.has("title") || !deserialized.has("author") || !deserialized.has("content")) {
+      r.sendResponseHeaders(400, -1);
     }
-    
-    if(!deserialized.has("tags") || !deserialized.has("title") || !deserialized.has("author") || !deserialized.has("content") || !deserialized.has("content")) {
+    else if(checkDup(title, author, content, tags)) {
       r.sendResponseHeaders(400, -1);
     }
     else {
-      
-      
-      
       Document doc = new Document()
           .append("title", title).append("author", author).append("content", content).append("tags", tags);
       
@@ -124,7 +124,17 @@ public class CreatePost implements HttpHandler {
     }
     if(deserialized.has("_id")) {
       id = deserialized.getString("_id");
-      temp = new ObjectId(id);
+      try { 
+        //What if an Id is given that cannot be found in the database, but the title exists then what do we do? 
+        //Right now it would give a 404 not found error
+        
+        temp = new ObjectId(id);
+
+        
+      } 
+      catch(Exception e) { 
+        r.sendResponseHeaders(400, -1);
+      }
     }
     
     if(!deserialized.has("_id") && !deserialized.has("title")) {
@@ -133,7 +143,7 @@ public class CreatePost implements HttpHandler {
     if(deserialized.has("_id")) {
       FindIterable<Document> documents = collection.find(new Document().append("_id", temp));
       
-      if(documents == null) {
+      if(documents.first() == null) {
         r.sendResponseHeaders(404, -1);
       }
 
@@ -143,14 +153,12 @@ public class CreatePost implements HttpHandler {
       r.sendResponseHeaders(200, tracker.toString().length());
       OutputStream os = r.getResponseBody();
       os.write((tracker.toString()).getBytes());
-      os.close();
-      
+      os.close();  
     }
     if(deserialized.has("title")) {
-      ArrayList<String> arr = new ArrayList<String>();
       FindIterable<Document> documents = collection.find().sort(new Document().append("title", 1));
       
-      if(documents == null) {
+      if(documents.first() == null) {
         r.sendResponseHeaders(404, -1);
       }
       
@@ -160,27 +168,22 @@ public class CreatePost implements HttpHandler {
           tracker.add(doc.toJson()); 
         }
       }
-     
       if(tracker.isEmpty()) {
         r.sendResponseHeaders(404, -1);
       }
-
       r.sendResponseHeaders(200, tracker.toString().length());
       OutputStream os = r.getResponseBody();
       os.write((tracker.toString()).getBytes());
       os.close();    
-      
     }  
-    
   }
-  
-  
-  
+ 
   public void handleDelete(HttpExchange r) throws IOException, JSONException{
     String body = Utils.convert(r.getRequestBody());
     JSONObject deserialized = new JSONObject(body);
     
     String id = "";
+    ObjectId temp = null; 
     
     if(deserialized.has("_id")) {
       id = deserialized.getString("_id");
@@ -190,32 +193,17 @@ public class CreatePost implements HttpHandler {
       r.sendResponseHeaders(400, -1);
     }
     else {
-      ObjectId temp = new ObjectId(id);
-      collection.findOneAndDelete(new Document().append("_id", temp));
+      try { 
+        temp = new ObjectId(id);
+      }
+      catch(Exception e) { 
+        r.sendResponseHeaders(400, -1);
+      }
+      Document random = collection.findOneAndDelete(new Document().append("_id", temp));
+      if(random == null) {
+        r.sendResponseHeaders(404, -1);
+      }
       r.sendResponseHeaders(200, -1);
-      
     }
-    
-    
   }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 }

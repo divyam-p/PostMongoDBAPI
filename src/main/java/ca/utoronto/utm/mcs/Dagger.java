@@ -7,29 +7,35 @@ import com.sun.net.httpserver.HttpServer;
 
 public class Dagger {
 
-	private HttpServer server;
-	private MongoClient db;
+    private HttpServer server;
+    private MongoClient db;
+    private Post post;
 
-	@Inject
-	public Dagger(HttpServer server, MongoClient db) {
-		this.server = server;
-		this.db = db;
-	}
+    @Inject
+    public Dagger(HttpServer server, Post post) {
+        this.server = server;
+        this.post = post;
+    }
 
-	public HttpServer getServer() {
-		return this.server;
-	}
+    public HttpServer getServer() {
+        return this.server;
+    }
 
-	public void setServer(HttpServer server) {
-		this.server = server;
-	}
+    public void setServer(HttpServer server) {
+        this.server = server;
+    }
 
-	public MongoClient getDb() {
-		return this.db;
-	}
+    public MongoClient getDb() {
+        return this.db;
+    }
 
-	public void setDb(MongoClient db) {
-		this.db = db;
-	}
+    public void setDb(MongoClient db) {
+        this.db = db;
+    }
+
+    public Post getPost() {
+      return post;
+    }
+
 
 }
