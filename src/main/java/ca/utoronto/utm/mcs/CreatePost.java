@@ -64,20 +64,15 @@ public class CreatePost implements HttpHandler {
     return true;
   
   }
-  
-  
   public void handlePut(HttpExchange r) throws IOException, JSONException{
     
     String body = Utils.convert(r.getRequestBody());
     JSONObject deserialized = new JSONObject(body);
-    
     String title ="";
     String author ="";
     String content ="";
     JSONArray temp;
     ArrayList<String> tags = new ArrayList<String>();
-    
-    
     if(deserialized.has("title")) {
       title = deserialized.getString(("title"));
     }
@@ -93,20 +88,14 @@ public class CreatePost implements HttpHandler {
       for(int i = 0; i < temp.length(); i++) {
         tags.add( temp.get(i).toString() );
       }
-    }
-    
+    } 
     if(!deserialized.has("tags") || !deserialized.has("title") || !deserialized.has("author") || !deserialized.has("content")) {
       r.sendResponseHeaders(400, -1);
     }
-    
     else if(checkDup(title, author, content, tags)) {
       r.sendResponseHeaders(400, -1);
-      
     }
     else {
-      
-      
-      
       Document doc = new Document()
           .append("title", title).append("author", author).append("content", content).append("tags", tags);
       
@@ -142,10 +131,13 @@ public class CreatePost implements HttpHandler {
       try { 
         //What if an Id is given that cannot be found in the database, but the title exists then what do we do? 
         //Right now it would give a 404 not found error
+        
         temp = new ObjectId(id);
+
+        
       } 
       catch(Exception e) { 
-        r.sendResponseHeaders(404, -1);
+        r.sendResponseHeaders(400, -1);
       }
     }
     
@@ -165,8 +157,7 @@ public class CreatePost implements HttpHandler {
       r.sendResponseHeaders(200, tracker.toString().length());
       OutputStream os = r.getResponseBody();
       os.write((tracker.toString()).getBytes());
-      os.close();
-      
+      os.close();  
     }
     if(deserialized.has("title")) {
       FindIterable<Document> documents = collection.find().sort(new Document().append("title", 1));
@@ -181,22 +172,16 @@ public class CreatePost implements HttpHandler {
           tracker.add(doc.toJson()); 
         }
       }
-     
       if(tracker.isEmpty()) {
         r.sendResponseHeaders(404, -1);
       }
-
       r.sendResponseHeaders(200, tracker.toString().length());
       OutputStream os = r.getResponseBody();
       os.write((tracker.toString()).getBytes());
       os.close();    
-      
     }  
-    
   }
-  
-  
-  
+ 
   public void handleDelete(HttpExchange r) throws IOException, JSONException{
     String body = Utils.convert(r.getRequestBody());
     JSONObject deserialized = new JSONObject(body);
@@ -216,34 +201,13 @@ public class CreatePost implements HttpHandler {
         temp = new ObjectId(id);
       }
       catch(Exception e) { 
+        r.sendResponseHeaders(400, -1);
+      }
+      Document random = collection.findOneAndDelete(new Document().append("_id", temp));
+      if(random == null) {
         r.sendResponseHeaders(404, -1);
       }
-      collection.findOneAndDelete(new Document().append("_id", temp));
       r.sendResponseHeaders(200, -1);
-      
-      
     }
-    
-    
   }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 }
