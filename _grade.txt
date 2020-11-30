@@ -1,0 +1,3 @@
+Team Name,utorid,Automarker,Database (x3),Git Flow,dependency-dagger,dependency-class,total,remark deduction,Git flow comments,Dependency Comments
+Samyam,pate1006,90.91,1,1,0,2,84.21,,,Post instantiated and constructed with class.
+If you have any questions or want a remark (with 20% penalty), please send an email to chungeng.meng@mail.utoronto.ca with your team name and request
